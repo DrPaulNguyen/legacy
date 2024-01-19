@@ -18,6 +18,16 @@ import rasa.utils.io
 import rasa.shared.utils.io
 from rasa.engine.storage.resource import Resource
 from rasa.engine.storage.storage import ModelStorage
+from rasa.core.policies.policy import PolicyPrediction, Policy, SupportedData
+from rasa.shared.core.trackers import DialogueStateTracker
+from rasa.shared.core.domain import State, Domain
+from rasa.shared.core.generator import TrackerWithCachedStates
+from rasa.core.constants import (
+    MEMOIZATION_POLICY_PRIORITY,
+    DEFAULT_MAX_HISTORY,
+    POLICY_MAX_HISTORY,
+    POLICY_PRIORITY,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +94,7 @@ class NLUModify(GraphComponent, EntityExtractorMixin):
             synonyms if there is a match.
         """
         try:
-            url = os.getenv("NLUMODIFY_API") or self._config['url']
+            url = self._config['url']
             body = {
                 'messages': [],
                 'config': self._config
@@ -127,6 +137,8 @@ class NLUModify(GraphComponent, EntityExtractorMixin):
         synonyms = None
 
         return cls(config, model_storage, resource, synonyms)
+
+
 
 
 @DefaultV1Recipe.register(
@@ -188,7 +200,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
             synonyms if there is a match.
         """
         try:
-            url = os.getenv("HYBRIDDIET_API") or self._config['url']
+            url = self._config['url']
             body = {
                 'messages': [],
                 'config': self._config
@@ -231,3 +243,82 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
         synonyms = None
 
         return cls(config, model_storage, resource, synonyms)
+
+
+
+
+@DefaultV1Recipe.register(
+    DefaultV1Recipe.ComponentType.POLICY_WITHOUT_END_TO_END_SUPPORT, is_trainable=False
+)
+class HybridPolicy(Policy):
+    @staticmethod
+    def get_default_config() -> Dict[Text, Any]:
+        return {
+            POLICY_PRIORITY: 1
+        }
+
+    def predict_action_probabilities(
+        self,
+        tracker: DialogueStateTracker,
+        domain: Domain,
+        rule_only_data: Optional[Dict[Text, Any]] = None,
+        **kwargs: Any,
+    ) -> PolicyPrediction:
+        """Predicts the next action the bot should take after seeing the tracker.
+
+        Args:
+            tracker: the :class:`rasa.core.trackers.DialogueStateTracker`
+            domain: the :class:`rasa.shared.core.domain.Domain`
+            rule_only_data: Slots and loops which are specific to rules and hence
+                should be ignored by this policy.
+
+        Returns:
+             The policy's prediction (e.g. the probabilities for the actions).
+        """
+        # result = [0.1] * domain.num_actions
+        try:
+            url = self.config['url']
+            body = {
+                'tracker': tracker.current_state(),
+                'domain': domain.as_dict(),
+                'config': self.config,
+            }
+            resp = requests.post(url, json=body)
+            data = resp.json()
+
+            if data['status'] != 'SUCCESS':
+                return self._prediction(self._default_predictions(domain))
+            else:
+                resMsgs = data['data']
+                return self._prediction(resMsgs['predictions'])
+        except Exception as e:
+            print('LogException', e)
+            return self._prediction(self._default_predictions(domain))
+
+    @classmethod
+    def load(
+        cls,
+        config: Dict[Text, Any],
+        model_storage: ModelStorage,
+        resource: Resource,
+        execution_context: ExecutionContext,
+        **kwargs: Any,
+    ) -> HybridPolicy:
+        """Loads a trained policy (see parent class for full docstring)."""
+        featurizer = None
+
+        return cls(
+            config,
+            model_storage,
+            resource,
+            execution_context,
+            featurizer=featurizer
+        )
+
+    def train(
+        self,
+        training_trackers: List[TrackerWithCachedStates],
+        domain: Domain,
+        **kwargs: Any,
+    ) -> Resource:
+        return self._resource
