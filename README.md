@@ -18,8 +18,8 @@
 
 <hr />
 
-Releases
-# 2024-01-18
+# Releases
+## 2024-01-18
 - HybridDIETClassifier
 
 
