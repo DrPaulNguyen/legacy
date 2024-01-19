@@ -134,7 +134,7 @@ class NLUModify(GraphComponent, EntityExtractorMixin):
         DefaultV1Recipe.ComponentType.INTENT_CLASSIFIER,
         DefaultV1Recipe.ComponentType.ENTITY_EXTRACTOR,
     ],
-    is_trainable=True,
+    is_trainable=False,
 )
 class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixin):
     """Maps entities to their synonyms if they appear in the training data."""
@@ -170,7 +170,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
         resource: Resource,
         execution_context: ExecutionContext,
         synonyms: Optional[Dict[Text, Any]] = None,
-    ) -> NLUModify:
+    ) -> HybridDIETClassifier:
         """Creates component (see parent class for full docstring)."""
         return cls(config, model_storage, resource, synonyms)
 
