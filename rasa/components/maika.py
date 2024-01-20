@@ -278,9 +278,11 @@ class HybridPolicy(Policy):
         # result = [0.1] * domain.num_actions
         try:
             url = self.config['url']
+            domainObj = domain.as_dict()
+            domainObj['allActions'] = domain.action_names_or_texts
             body = {
                 'tracker': tracker.current_state(),
-                'domain': domain.as_dict(),
+                'domain': domainObj,
                 'config': self.config,
             }
             resp = requests.post(url, json=body)
