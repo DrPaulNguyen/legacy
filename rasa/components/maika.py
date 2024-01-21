@@ -182,7 +182,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
         resource: Resource,
         execution_context: ExecutionContext,
         synonyms: Optional[Dict[Text, Any]] = None,
-    ) -> HybridDIETClassifier:
+    ) -> NLUModify:
         """Creates component (see parent class for full docstring)."""
         return cls(config, model_storage, resource, synonyms)
 
@@ -278,10 +278,12 @@ class HybridPolicy(Policy):
         # result = [0.1] * domain.num_actions
         try:
             url = self.config['url']
+            trackerObj = tracker.current_state()
+            trackerObj['events'] = [e.as_dict() for e in tracker.events]
             domainObj = domain.as_dict()
             domainObj['allActions'] = domain.action_names_or_texts
             body = {
-                'tracker': tracker.current_state(),
+                'tracker': trackerObj,
                 'domain': domainObj,
                 'config': self.config,
             }
