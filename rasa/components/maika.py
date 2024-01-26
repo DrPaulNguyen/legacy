@@ -182,7 +182,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
         resource: Resource,
         execution_context: ExecutionContext,
         synonyms: Optional[Dict[Text, Any]] = None,
-    ) -> NLUModify:
+    ) -> HybridDIETClassifier:
         """Creates component (see parent class for full docstring)."""
         return cls(config, model_storage, resource, synonyms)
 
