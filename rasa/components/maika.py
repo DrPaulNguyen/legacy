@@ -8,7 +8,7 @@ import requests
 from rasa.engine.graph import GraphComponent, ExecutionContext
 from rasa.engine.recipes.default_recipe import DefaultV1Recipe
 from rasa.shared.constants import DOCS_URL_TRAINING_DATA
-from rasa.shared.nlu.constants import ENTITIES, TEXT, INTENT
+from rasa.shared.nlu.constants import ENTITIES, TEXT, INTENT, INTENT_RANKING_KEY
 from rasa.shared.nlu.training_data.training_data import TrainingData
 from rasa.shared.nlu.training_data.message import Message
 from rasa.nlu.utils import write_json_to_file
@@ -210,6 +210,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                     TEXT: msg.get(TEXT),
                     ENTITIES: msg.get(ENTITIES, []),
                     INTENT: msg.get(INTENT, {}),
+                    INTENT_RANKING_KEY: msg.get(INTENT_RANKING_KEY, {}),
                 })
 
             resp = requests.post(url, json=body)
@@ -218,13 +219,10 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                 return messages
             else:
                 resMsgs = data['data']
-                index = 0   
+                index = 0
                 for message in messages:
                     resMsg = resMsgs[index]
                     for key in resMsg:
-                        logger.debug(
-                            f"Response [${key}]: ${msg.get(key)} ==> ${resMsg[key]}"
-                        )
                         message.set(key, resMsg[key], add_to_output=True)
                     index += 1
                 return messages
