@@ -222,11 +222,11 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                 for message in messages:
                     resMsg = resMsgs[index]
                     for key in resMsg:
+                        logger.debug(
+                            f"Response [${key}]: ${msg.get(key)} ==> ${resMsg[key]}"
+                        )
                         message.set(key, resMsg[key], add_to_output=True)
                     index += 1
-                logger.debug(
-                    f"Messages after processed: ${messages}"
-                )
                 return messages
         except Exception as e:
             print('LogException', e)
