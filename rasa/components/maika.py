@@ -8,7 +8,7 @@ import requests
 from rasa.engine.graph import GraphComponent, ExecutionContext
 from rasa.engine.recipes.default_recipe import DefaultV1Recipe
 from rasa.shared.constants import DOCS_URL_TRAINING_DATA
-from rasa.shared.nlu.constants import ENTITIES, TEXT, INTENT, INTENT_RANKING_KEY
+from rasa.shared.nlu.constants import ENTITIES, TEXT, INTENT, INTENT_RANKING_KEY, TEXT_TOKENS
 from rasa.shared.nlu.training_data.training_data import TrainingData
 from rasa.shared.nlu.training_data.message import Message
 from rasa.nlu.utils import write_json_to_file
@@ -208,6 +208,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
             for msg in messages:
                 body['messages'].append({
                     TEXT: msg.get(TEXT),
+                    TEXT_TOKENS: msg.get(TEXT_TOKENS),
                     ENTITIES: msg.get(ENTITIES, []),
                     INTENT: msg.get(INTENT, {}),
                     INTENT_RANKING_KEY: msg.get(INTENT_RANKING_KEY, {}),
