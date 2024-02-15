@@ -205,7 +205,6 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                 'messages': [],
                 'config': self._config
             }
-            print('Messages', messages)
             for msg in messages:
                 body['messages'].append({
                     TEXT: msg.get(TEXT),
@@ -214,8 +213,6 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                     INTENT: msg.get(INTENT, {}),
                     INTENT_RANKING_KEY: msg.get(INTENT_RANKING_KEY, []),
                 })
-
-            print('Message body', body)
 
             resp = requests.post(url, json=body)
             data = resp.json()
@@ -231,7 +228,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                     index += 1
                 return messages
         except Exception as e:
-            print('LogException', e)
+            logger.error('LogException', e)
             return messages
 
     # Adapt to get path from model storage and resource
