@@ -206,9 +206,10 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                 'config': self._config
             }
             for msg in messages:
+                tokens =  msg.get(TEXT_TOKENS, [])
                 body['messages'].append({
                     TEXT: msg.get(TEXT),
-                    TEXT_TOKENS: msg.get(TEXT_TOKENS),
+                    TEXT_TOKENS: [(t.start, t.end) for t in tokens],
                     ENTITIES: msg.get(ENTITIES, []),
                     INTENT: msg.get(INTENT, {}),
                     INTENT_RANKING_KEY: msg.get(INTENT_RANKING_KEY, []),
