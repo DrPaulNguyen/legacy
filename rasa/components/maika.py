@@ -205,6 +205,7 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                 'messages': [],
                 'config': self._config
             }
+            print('Messages', messages)
             for msg in messages:
                 body['messages'].append({
                     TEXT: msg.get(TEXT),
@@ -213,6 +214,8 @@ class HybridDIETClassifier(GraphComponent, IntentClassifier, EntityExtractorMixi
                     INTENT: msg.get(INTENT, {}),
                     INTENT_RANKING_KEY: msg.get(INTENT_RANKING_KEY, []),
                 })
+
+            print('Message body', body)
 
             resp = requests.post(url, json=body)
             data = resp.json()
