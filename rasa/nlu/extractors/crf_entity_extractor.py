@@ -279,7 +279,7 @@ class CRFEntityExtractor(GraphComponent, EntityExtractorMixin):
             entities = self.add_extractor_name(entities)
             f_entities = []
             for e in entities:
-                if e.confidence_entity >= self.component_config['threshold']:
+                if e.confidence_entity and e.confidence_entity >= self.component_config['threshold']:
                     f_entities.append(e)
 
             message.set(
