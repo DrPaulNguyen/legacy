@@ -171,6 +171,7 @@ class CRFEntityExtractor(GraphComponent, EntityExtractorMixin):
             # Name of dense featurizers to use.
             # If list is empty all available dense features are used.
             "featurizers": [],
+            "threshold": 0.0,
         }
 
     def __init__(
@@ -276,8 +277,13 @@ class CRFEntityExtractor(GraphComponent, EntityExtractorMixin):
         for message in messages:
             entities = self.extract_entities(message)
             entities = self.add_extractor_name(entities)
+            f_entities = []
+            for e in entities:
+                if e.confidence_entity >= self.component_config['threshold']:
+                    f_entities.append(e)
+
             message.set(
-                ENTITIES, message.get(ENTITIES, []) + entities, add_to_output=True
+                ENTITIES, message.get(ENTITIES, []) + f_entities, add_to_output=True
             )
 
         return messages
