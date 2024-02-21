@@ -21,7 +21,12 @@ from rasa.nlu.extractors.extractor import EntityExtractorMixin
 from rasa.nlu.tokenizers.tokenizer import Token, Tokenizer
 from rasa.shared.nlu.training_data.training_data import TrainingData
 from rasa.shared.nlu.training_data.message import Message
-from rasa.nlu.constants import TOKENS_NAMES
+from rasa.nlu.constants import (
+    TOKENS_NAMES,
+    ENTITY_ATTRIBUTE_CONFIDENCE_TYPE,
+    ENTITY_ATTRIBUTE_CONFIDENCE_ROLE,
+    ENTITY_ATTRIBUTE_CONFIDENCE_GROUP,
+)
 from rasa.shared.nlu.constants import (
     TEXT,
     ENTITIES,
@@ -277,9 +282,11 @@ class CRFEntityExtractor(GraphComponent, EntityExtractorMixin):
         for message in messages:
             entities = self.extract_entities(message)
             entities = self.add_extractor_name(entities)
+            threshold = self.component_config["threshold"]
             f_entities = []
             for e in entities:
-                if e.confidence_entity and e.confidence_entity >= self.component_config['threshold']:
+                confidence_entity = e[ENTITY_ATTRIBUTE_CONFIDENCE_TYPE]
+                if confidence_entity and confidence_entity >= threshold:
                     f_entities.append(e)
 
             message.set(
