@@ -17,9 +17,12 @@ logger = logging.getLogger(__name__)
 
 def _get_lock_lifetime() -> int:
     return int(os.environ.get("TICKET_LOCK_LIFETIME", 0)) or DEFAULT_LOCK_LIFETIME
+def _get_lock_wait() -> int:
+    return int(os.environ.get("TICKET_LOCK_WAITSECONDS", 1))
 
 
 LOCK_LIFETIME = _get_lock_lifetime()
+LOCK_WAIT = _get_lock_wait()
 DEFAULT_SOCKET_TIMEOUT_IN_SECONDS = 10
 
 DEFAULT_REDIS_LOCK_STORE_KEY_PREFIX = "lock:"
@@ -93,7 +96,7 @@ class LockStore:
         self,
         conversation_id: Text,
         lock_lifetime: float = LOCK_LIFETIME,
-        wait_time_in_seconds: float = 1,
+        wait_time_in_seconds: float = LOCK_WAIT,
     ) -> AsyncGenerator[TicketLock, None]:
         """Acquire lock with lifetime `lock_lifetime`for `conversation_id`.
 
